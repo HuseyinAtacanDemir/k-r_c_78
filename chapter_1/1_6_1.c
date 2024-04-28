@@ -18,7 +18,7 @@ main() { /* counts digits, white space, others */
 
   printf("\nDigits:");
   for(i = 0; i < 10; ++i)
-    printf("\n%d: %d", i, ndigit[i]); 
+      printf("\n%d: %d", i, ndigit[i]); 
   
   printf("\nWhite Space: %d\nOther: %d\n", nwhite, nother);
 }
