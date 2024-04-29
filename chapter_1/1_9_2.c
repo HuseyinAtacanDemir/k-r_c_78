@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-#define MAXLINE 1000
+#define MAXLINELEN 1000
+#define MAXLINECOUNT 1000
+
 
 int get_line(char *s, int lim);
 void copy(char *s1, char *s2);
@@ -9,17 +11,21 @@ main ()
 {
   int len;
   int max;
-  char line[MAXLINE];
-  char save[MAXLINE];
-
-  max = 0;
-  while ((len = get_line(line, MAXLINE)) > 0)
+  int count;
+  char line[MAXLINELEN];
+  char save[MAXLINECOUNT][MAXLINELEN];
+  int len_of_saved[MAXLINELEN];
+  max = 80;
+  count = 0;
+  while ((len = get_line(line, MAXLINELEN)) > 0)
     if (len > max) {
-      max = len;
-      copy(line, save);
+      copy(line, save[count]);
+      len_of_saved[count] = len;
+      ++count;
     }
-  if (max > 0)
-    printf("\nLen: %d, Line: %s", max, save);
+  int i;
+  for (i = 0; i < count; i++)
+    printf("\nLen: %d, Line: %s", len_of_saved[i], save[i]);
 } 
 
 int get_line(char *s, int lim)
