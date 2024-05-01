@@ -4,7 +4,7 @@
 
 void remove_comments(char *in, char *out);
 
-int main()
+int main(
 {
   char c;
   char input[MAXINPUT];
