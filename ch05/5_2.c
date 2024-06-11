@@ -15,8 +15,8 @@ main()
 //assumes s is large anough
 void strcat_ptr(char *s, char *t)
 {
-  for ( ; *s; s++)  /* find end of s */
-    ;
+  while (*s)  /* find end of s */
+    s++;
   while ((*s++ = *t++)) /* copy t */
     ;
 }
