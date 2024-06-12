@@ -11,6 +11,13 @@ main(int argc, char *argv[]) /* find pattern from first argument */
   long lineno = 0;
   int except = 0, number = 0;
 
+  /*
+    While arg count is greater than 0,
+    pre increment argv and check if first args first char is a -
+    if it is a '-' then the following chars are options
+    once an arg with no - prefix is seen loop is exited
+    and argv ptr points to the next arg, which is assumed to be the pattern
+  */
   while (--argc > 0 && (*++argv)[0] == '-')
     for (s = argv[0]+1; *s != '\0'; s++)
       switch (*s) {
@@ -25,10 +32,16 @@ main(int argc, char *argv[]) /* find pattern from first argument */
         argc = 0;
         break;
       }
+  /*
+    If there is not exactly one argument left after the while loop that detects the options
+    is run, that means the user utilized the tool incorrectly, since we assume the last arg to be
+    the pattern
+  */
   if (argc != 1)
     printf("Usage: find -x -n pattern\n");
   else
     while (get_line(line, MAXLINE) > 0) {
+      //saving cur line num in case number option was selected
       lineno++;
       if ((index_custom(line, *argv) >= 0) != except) {
         if (number)
@@ -37,8 +50,6 @@ main(int argc, char *argv[]) /* find pattern from first argument */
         }
     }
 }
-
-
 
 int get_line(char *s, int lim) /* get line into s, return length */
 {
