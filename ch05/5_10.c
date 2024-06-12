@@ -13,7 +13,7 @@ int get_line(char *, int);
 char *alloc_mem(int);
 void throw_error(char *);
 
-char *message = "Usage:\n\ntail\ntail -n <line_count>\n";
+char *message = "Usage:\n\ntail < <file_name>\ntail -n <line_count> < <file_name>\ntail -N < <file_name>\n";
 
 static char mem_buf[MEM_SIZE];
 static char *mem_ptr = mem_buf;
