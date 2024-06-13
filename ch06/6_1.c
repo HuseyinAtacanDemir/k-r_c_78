@@ -49,17 +49,28 @@ static struct key keytab[] = {
 
 int binary(char *, struct key[], int);
 int getword(char *, int);
-char type(char);
+//char type(char);
 char getch();
 void ungetch(char);
 
 char buf[BUFSIZE];
 int bufp = 0;
 
+int type[256];
+
 main()
 {
   int n, t;
   char word[MAXWORD];
+
+  for (n = 0; n < 256; n++) {
+    if (n >= 0x41 && n <= 0x5A || n >= 0x61 && n <= 0x7A)
+      type[n] = 'a';
+    else if (n >= 0x30 && n <= 0x39)
+      type[n] = '0';
+    else
+      type[n] = -1;
+  }
   
   while ((t = getword(word, MAXWORD)) != EOF)
     if (t == LETTER)
@@ -92,13 +103,15 @@ int binary(char *word, struct key tab[], int n)
 int getword(char *w, int lim)
 {
   int c, t;
-  if (type(c = *w++ = getch()) != LETTER) {
+  c = *w++ = getch();
+  if (type[c] != LETTER) {
     *w = '\0';
     return c;
   }
 
   while (--lim > 0) {
-    t = type(c = *w++ = getch());
+    c = *w++ = getch();
+    t = type[c];
     if (t != LETTER && t != DIGIT) {
       ungetch(c);
       break;
@@ -108,15 +121,15 @@ int getword(char *w, int lim)
   return LETTER;
 }
 
-char type(char c)
-{
-  if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
-    return LETTER;
-  else if (c >= '0' && c <= '9')
-    return DIGIT;
-  else
-    return c;
-}
+//char type(char c)
+//{
+//  if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
+//    return LETTER;
+//  else if (c >= '0' && c <= '9')
+//    return DIGIT;
+//  else
+//    return c;
+//}
 
 
 char getch()
