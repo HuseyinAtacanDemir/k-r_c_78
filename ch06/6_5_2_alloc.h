@@ -1,7 +1,7 @@
 #ifndef ALLOC_H
 #define ALLOC_H
 
-#define MAX_MEM 10000
+#define MAX_MEM 100000
 
 extern char mem_buf[MAX_MEM];
 extern char *mem_ptr;

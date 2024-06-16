@@ -25,4 +25,5 @@ main()
       root = tree(root, word);
 
   treeprint(root);
+  treeprint_2d(root, 0);
 }

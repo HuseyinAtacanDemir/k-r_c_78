@@ -4,13 +4,15 @@
 char mem_buf[MAX_MEM];
 char *mem_ptr = mem_buf;
 
-char * alloc_custom(int n)
+char *alloc_custom(int n)
 {
   if (mem_ptr + n <= mem_buf + MAX_MEM) {
     mem_ptr += n;
     return (mem_ptr - n);
-  } else 
+  } else { 
+    printf("Memory allocation failed\n");
     return NULL;
+  }
 }
 
 void free_custom(char *p)
