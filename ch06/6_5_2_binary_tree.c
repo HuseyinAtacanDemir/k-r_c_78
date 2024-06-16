@@ -22,7 +22,7 @@ main()
   root = NULL;
   while ((t = getword(word, MAXWORD)) != EOF)
     if (t == LETTER)
-      root = tree(root, word);
+      root = insert(root, word);
 
   treeprint(root);
   treeprint_2d(root, 0);

@@ -51,7 +51,7 @@ struct tnode * new_node(char *word)
   return node;
 }
 
-struct tnode * tree(struct tnode *p, char *word)
+struct tnode * insert(struct tnode *p, char *word)
 {
   int cond;
 
@@ -64,34 +64,13 @@ struct tnode * tree(struct tnode *p, char *word)
     p->count++;
     return p;
   } else if ( cond < 0 ) {
-    p->left = tree(p->left, word);
+    p->left = insert(p->left, word);
   } else {
-    p->right = tree(p->right, word);
+    p->right = insert(p->right, word);
   }
 
-  int left_h = get_height(p->left);
-  int right_h = get_height(p->right);
-  p->height = left_h > right_h ? left_h + 1 : right_h + 1;
+  return balance_tree(p, word);
 
-  int balance = get_balance(p);
-
-  if (balance > 1 && strcmp(word, p->right->word) > 0)
-    return rol(p);
-
-  if (balance < -1 && strcmp(word, p->left->word) < 0)
-    return ror(p);
-  
-  if (balance > 1 && strcmp(word, p->right->word) < 0) {
-    p->right = ror(p->right);
-    return rol(p);
-  }
-
-  if (balance < -1 && strcmp(word, p->left->word) > 0) {
-    p->left = rol(p->left);
-    return ror(p);
-  }
-
-  return p;
 }
 
 int get_height(struct tnode *node)
@@ -152,4 +131,32 @@ struct tnode *rol(struct tnode *old_root_turned_l)
   new_root->height = max(new_root_left_h, new_root_right_h) + 1;
 
   return new_root;
+}
+
+struct tnode * balance_tree(struct tnode *p, char *word)
+{
+  int left_h = get_height(p->left);
+  int right_h = get_height(p->right);
+  p->height = left_h > right_h ? left_h + 1 : right_h + 1;
+
+  int balance = get_balance(p);
+
+  if (balance > 1) { //right heavy
+    int cond = strcmp(word, p->right->word);  
+    if (cond > 0) {
+      return rol(p);
+    } else if (cond < 0) {
+      p->right = ror(p->right);
+      return rol(p);
+    }
+  } else if (balance < -1) { //left heavy
+    int cond = strcmp(word, p->left->word);
+    if (cond < 0) {
+      ror(p);
+    } else if (cond > 0) {
+      p->left = rol(p->left);
+      return ror(p);
+    }
+  }
+  return p;
 }
