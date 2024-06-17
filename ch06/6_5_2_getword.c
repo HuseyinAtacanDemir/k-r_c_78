@@ -1,12 +1,26 @@
 #include <stdio.h>
 #include <string.h>
-#include "6_5_2_getword.h"
 #include "6_5_2_alloc.h"
-
+#include "6_5_2_getword.h"
 char buf[BUFSIZE];
 int bufp = 0;
 int type[256];
 int initialized = 0;
+
+int str_cmp(char *s, char *t, int *found, int *match, int boundary)
+{
+  int i;
+ 
+  for (i = 0; *s == *t; i++, s++, t++)
+    if (*s == '\0')
+      return 0;
+  if (i >= boundary) {
+    *found = 1;
+    *match = 1;
+  }
+    
+  return (*s-*t);
+}
 
 int initialize_type_lookup()
 {
@@ -82,5 +96,4 @@ char *strsave(char * w)
   strcpy(copy, w);
   return copy;
 }
-
 
