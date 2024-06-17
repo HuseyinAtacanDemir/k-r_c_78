@@ -14,6 +14,7 @@ extern int type[256];
 int str_cmp(char *, char *, int *, int *, int);
 int initialize_type_lookup();
 int getword(char *, int);
+int getword_with_line(char *, int *, int);
 char getch();
 void ungetch(char);
 char * strsave(char *);

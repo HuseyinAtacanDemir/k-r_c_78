@@ -2,6 +2,7 @@
 #include <string.h>
 #include "6_5_2_alloc.h"
 #include "6_5_2_getword.h"
+
 char buf[BUFSIZE];
 int bufp = 0;
 int type[256];
@@ -37,6 +38,45 @@ int initialize_type_lookup()
     }
   }
   return 1;
+}
+
+int getword_with_line(char *w, int *line, int lim)
+{  
+  initialized = initialize_type_lookup();
+  int c, t;
+  c = *w++ = getch();
+  if (c == '"') {
+    while ((c = getch()) != '"' && c != EOF) {
+      if (c == '\n')
+        (*line)++; //increment line count
+    }
+      
+    if (c == EOF) {
+      *(w-1) = '\0';
+      return c;
+    } else {
+      *(w-1) = c;
+    }
+  }
+
+  if(c == '\n')
+    (*line)++;
+    
+  if (type[c] != LETTER) {
+    *w = '\0';
+    return c;
+  }
+
+  while (--lim > 0) {
+    c = *w++ = getch();
+    t = type[c];
+    if (t != LETTER && t != DIGIT) {
+      ungetch(c);
+      break;
+    }
+  }
+  *(w-1) = '\0';
+  return LETTER;
 }
 
 int getword(char *w, int lim)
