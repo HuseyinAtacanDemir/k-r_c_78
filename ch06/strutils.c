@@ -11,13 +11,13 @@ char *str_save(char *s)
 
 void str_cpy(char *s, char *t)
 {
-  while (*s++ = *t++)
+  while ((*s++ = *t++))
     ;
 }
 
 int str_len(char *s)
 {
-  char *p = *s;
+  char *p = s;
   
   while (*s++)
     ;

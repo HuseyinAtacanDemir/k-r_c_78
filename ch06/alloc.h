@@ -7,6 +7,6 @@ extern char mem_buf[MAX_MEM];
 extern char *mem_ptr;
 
 char * alloc_custom(int);
-void free(char *);
+void free_custom(char *);
 
 #endif

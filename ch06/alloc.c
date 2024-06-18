@@ -6,7 +6,7 @@ char *mem_ptr = mem_buf;
 
 char *alloc_custom(int size)
 {
-  if (mem_ptr + size < mem_buf + MAX_SIZE) {
+  if (mem_ptr + size < mem_buf + MAX_MEM) {
     mem_ptr += size;
     return mem_ptr - size;
   } else {
@@ -15,7 +15,7 @@ char *alloc_custom(int size)
   }
 }
 
-void free(char *mem_block)
+void free_custom(char *mem_block)
 {
   if (mem_block >= mem_buf && mem_block < mem_buf + MAX_MEM)
     mem_ptr = mem_block;

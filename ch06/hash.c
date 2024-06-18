@@ -3,9 +3,15 @@
 #include "hash.h"
 #include "strutils.h"
 
-#define HASHSIZE 100
+struct nlist *hashtab[HASHSIZE];
 
-static struct nlist *hashtab[HASHSIZE];
+int hash(char *s)
+{
+  int hashval;
+  for (hashval = 0; *s != 0; hashval += *s++)
+    ;
+  return (hashval % HASHSIZE);
+}
 
 struct nlist *lookup(char *s)
 {
@@ -24,19 +30,19 @@ struct nlist *install(char *name, char *def)
   int hashval;
 
   if ((np = lookup(name)) == NULL) {
-    np = (struct nlist *) alloc(sizeof(*np));
+    np = (struct nlist *) malloc(sizeof(*np));
     if (np == NULL)
       return NULL;
-    if ((np->name == str_save(name)) == NULL)
+    if ((np->name = str_save(name)) == NULL)
       return NULL;
     hashval = hash(np->name);
     np->next = hashtab[hashval];
-    hashtab{hashval} = np;
+    hashtab[hashval] = np;
   } else {
     free(np->def);
   }
 
-  if ((np->def == str_save(def)) == NULL)
+  if ((np->def = str_save(def)) == NULL)
     return NULL;
   
   return np;
