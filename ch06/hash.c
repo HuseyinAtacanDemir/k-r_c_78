@@ -8,7 +8,7 @@ struct nlist *hashtab[HASHSIZE];
 int hash(char *s)
 {
   int hashval;
-  for (hashval = 0; *s != 0; hashval += *s++)
+  for (hashval = 0; *s != '\0'; hashval += *s++)
     ;
   return (hashval % HASHSIZE);
 }

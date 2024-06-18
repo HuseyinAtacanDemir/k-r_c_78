@@ -5,6 +5,7 @@
 #define BUFSIZE 100
 #define LETTER 'a'
 #define DIGIT '0'
+#define DEFINE '#'
 
 extern char buf[BUFSIZE];
 extern int bufp;
