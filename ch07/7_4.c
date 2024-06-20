@@ -30,8 +30,8 @@ main(int argc, char *argv[]) /* find pattern from first argument */
         number = 1;
         break;
       default:
-        printf("find: illegal option %c\n", *s);
-        argc = 0;
+        fprintf(stderr, "grep: illegal option %c\n", *s);
+        exit(1);
         break;
       }
 
@@ -73,7 +73,8 @@ main(int argc, char *argv[]) /* find pattern from first argument */
       }
     }
   } else {
-    printf("Usage: find -x -n pattern\n");
+    fprintf(stderr, "grep:\n\tUsage:\n\t\t./a.out -x[except] -n[print line #'s] pattern <default input: stdin>\n\t\t./a.out -x[except] -n[print line #'s & file names if file#>1] pattern <file1> <file2> ...\n");
+    exit(1);
   }
 }
 
