@@ -22,7 +22,7 @@ DESCRIPTION
 */
 
 int isnumber(char *);
-
+int copy_substr(char *, char *, int, int);
 main(int argc, char **argv)
 {
 
@@ -34,30 +34,26 @@ main(int argc, char **argv)
 
   int length = DEF_LENGTH;
   int width = DEF_WIDTH; 
-  
+  int i = 0;
+    
   while (--argc > 0 && (*++argv)[0] == '-') {
-    char *s, *p;
-    p = *argv;
-    for (s = p+1; *s != '\0'; s++) {
-      char *arg = *(argv+(s-p));
-      switch (*s) {
-        case 'l':
-          if (!isnumber(arg)) {
-            fprintf(stderr, "page: Illegal line length value %s\n", arg);
-            exit(1);
-          }
-          length = atoi(arg);
-          break;
-        case 'w':
-          if (!isnumber(arg)) {
-            fprintf(stderr, "page: Illegal line length value %s\n", arg);
-            exit(1);
-          }
-          width = atoi(arg);
-          break;
-        default:
-          fprintf(stderr, "page: Illegal option %c\n", *s);
-          exit(1);
+    if (*(argv[0]+1) == 'l') {
+      if (argv[1] != NULL && isnumber(argv[1])) {
+        length = atoi(argv[1]);
+        --argc;
+        ++argv;
+      } else {
+        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
+        exit(1);
+      }
+    } else if (*(argv[0]+1) == 'w') {
+      if (argv[1] != NULL && isnumber(argv[1])) {
+        width = atoi(argv[1]);
+        --argc;
+        ++argv;
+      } else {
+        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
+        exit(1);
       }
     }
   }
@@ -73,7 +69,7 @@ main(int argc, char **argv)
       while (fp != NULL && (c = line_overflow[0] ? line_overflow : fgets(line, MAXLINE, fp)) != NULL) {
         int cur_line_len = strlen(c);
         if (line_no == 0 && page_no == 0) {
-          printf("%*s", (int)(width-strlen(*argv)/2), *argv);
+          printf("%*s\n", (int)((width-strlen(*argv))/2), *argv);
           line_no++;
         } else if (line_no == length-1) {
           printf("%*d\n", width/2, page_no+1);
@@ -94,6 +90,11 @@ main(int argc, char **argv)
         }
         
       }
+      if (line_no != 0) {
+        while (line_no != 0 && line_no++ < length-2)
+          printf("\n");
+        printf("%*d\n", width/2, page_no+1);
+      }
       fclose(fp);
       argv++;
     }
@@ -112,4 +113,30 @@ int isnumber(char *s) {
     }
  }
   return 1;
+}
+
+int copy_substr(char *s, char *p, int start, int end)
+{
+  if (end == -1) {
+    end = strlen(p);
+  }
+  if(start >= strlen(p)) {
+    fprintf(stderr, "copy_substr: invalid start index: %d for str with len len: %lu\n", start, strlen(p));
+    return 1;
+  }
+  if(end > strlen(p)) {
+    fprintf(stderr, "substr: invalid end index: %d for str with len: %lu\n", end, strlen(p));
+    return 1;
+  }
+  
+  if (start > end) {
+    fprintf(stderr, "copy_substr: invalid indexes, start index: %d cannot be bigger than end index: %d\n", start, end);
+    return 1;
+  }
+  
+  for ( ; start<=end; start++) {
+    *s++ = *(p+start);
+  }
+  *s = '\0';
+  return 0;
 }
