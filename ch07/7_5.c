@@ -43,7 +43,7 @@ main(int argc, char **argv)
         --argc;
         ++argv;
       } else {
-        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
+        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>0] [-w num>0] [file ...]\n");
         exit(1);
       }
     } else if (*(argv[0]+1) == 'w') {
@@ -52,26 +52,33 @@ main(int argc, char **argv)
         --argc;
         ++argv;
       } else {
-        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
+        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>0] [-w num>0] [file ...]\n");
         exit(1);
       }
     }
   }
 
-  if (argc > 1) {
-    while (--argc > 0) {
+  if (length <= 1 || width <= 0) {
+    fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>1] [-w num>0] [file ...]\n");
+    exit(1);
+  }
+
+  if (argc >= 1) {
+    while (argc-- > 0) {
       FILE *fp = fopen(*argv, "r");
       if (fp == NULL) {
         fprintf(stderr, "page: can't open %s\n", *argv);
         exit(1);
       }
       line_no = page_no = 0;
-      while (fp != NULL && (c = line_overflow[0] ? line_overflow : fgets(line, MAXLINE, fp)) != NULL) {
+      line_overflow[0] = '\0';
+      while (fp != NULL && (c = line_overflow[0] != '\0' ? line_overflow : fgets(line, MAXLINE, fp)) != NULL) {
         int cur_line_len = strlen(c);
         if (line_no == 0 && page_no == 0) {
           printf("%*s\n", (int)((width-strlen(*argv))/2), *argv);
           line_no++;
-        } else if (line_no == length-1) {
+        } 
+        if (line_no == length-1) {
           printf("%*d\n", width/2, page_no+1);
           line_no = 0;
           page_no++;
@@ -82,13 +89,12 @@ main(int argc, char **argv)
           line_no++;
           line_overflow[0] = '\0';
         } else {
-          copy_substr(line_overflow, line, (width-2), -1);
-          line[width-2] = '\n';
-          line[width-1] = '\0';
+          copy_substr(line_overflow, line, (width-1), -1);
+          line[width-1] = '\n';
+          line[width] = '\0';
           printf("%s", c);
           line_no++;
         }
-        
       }
       if (line_no != 0) {
         while (line_no != 0 && line_no++ < length-2)
