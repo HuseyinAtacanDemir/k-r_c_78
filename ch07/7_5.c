@@ -20,10 +20,13 @@ DESCRIPTION
   new "page".
   
 */
+
+int isnumber(char *);
+
 main(int argc, char **argv)
 {
 
-  char line[MAXLINE], *c;
+  char line[MAXLINE], line_overflow[MAXLINE], *c;
 
   int line_no = 0;
   int char_pos = 0;
@@ -32,30 +35,32 @@ main(int argc, char **argv)
   int length = DEF_LENGTH;
   int width = DEF_WIDTH; 
   
-  while (--argc > 0 && (*++argv)[0] == '-')
-    char *s, *p, *arg;
-    p = argv[0];
-    for (s = p+1; *s != '\0'; s++)
+  while (--argc > 0 && (*++argv)[0] == '-') {
+    char *s, *p;
+    p = *argv;
+    for (s = p+1; *s != '\0'; s++) {
+      char *arg = *(argv+(s-p));
       switch (*s) {
-        arg = (argv+(s-p));
         case 'l':
-          if (!isnumber(*arg)) {
-            fprintf(stderr, "page: Illegal line length value %s\n", *arg);
+          if (!isnumber(arg)) {
+            fprintf(stderr, "page: Illegal line length value %s\n", arg);
             exit(1);
           }
-          length = atoi(*arg);
+          length = atoi(arg);
           break;
         case 'w':
-          if (!isnumber(*arg)) {
-            fprintf(stderr, "page: Illegal line length value %s\n", *arg);
+          if (!isnumber(arg)) {
+            fprintf(stderr, "page: Illegal line length value %s\n", arg);
             exit(1);
           }
-          width = atoi(*arg);
+          width = atoi(arg);
           break;
         default:
           fprintf(stderr, "page: Illegal option %c\n", *s);
           exit(1);
       }
+    }
+  }
 
   if (argc > 1) {
     while (--argc > 0) {
@@ -64,10 +69,31 @@ main(int argc, char **argv)
         fprintf(stderr, "page: can't open %s\n", *argv);
         exit(1);
       }
-      while (fp != NULL && (c = fgets(line, MAXLINE, fp)) != NULL) {
+      line_no = page_no = 0;
+      while (fp != NULL && (c = line_overflow[0] ? line_overflow : fgets(line, MAXLINE, fp)) != NULL) {
+        int cur_line_len = strlen(c);
+        if (line_no == 0 && page_no == 0) {
+          printf("%*s", (int)(width-strlen(*argv)/2), *argv);
+          line_no++;
+        } else if (line_no == length-1) {
+          printf("%*d\n", width/2, page_no+1);
+          line_no = 0;
+          page_no++;
+        }
+        
+        if (cur_line_len < width){
+          printf("%s", c);
+          line_no++;
+          line_overflow[0] = '\0';
+        } else {
+          copy_substr(line_overflow, line, (width-2), -1);
+          line[width-2] = '\n';
+          line[width-1] = '\0';
+          printf("%s", c);
+          line_no++;
+        }
         
       }
-      line_no = char_pos = page_no = 0;
       fclose(fp);
       argv++;
     }
@@ -75,4 +101,15 @@ main(int argc, char **argv)
     fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
     exit(1);
   }
+}
+
+int isnumber(char *s) {
+  while (*s) {
+    if (*s >= 0x30 && *s < 0x39) {
+      s++;
+    } else {
+      return 0;
+    }
+ }
+  return 1;
 }
