@@ -5,6 +5,26 @@
 #define MAXLINE     1000
 #define DEF_LENGTH  100
 #define DEF_WIDTH   100
+#define help() { \
+    fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>1] [-w num>0] [file ...]\n");\
+    exit(1); \
+}
+
+#define file_err(msg) { \
+    fprintf(stderr, "page: can't open file %s\n", *msg); \
+    exit(1); \
+}
+
+#define strip_newline_at_end(c) { \
+    char *p = (c);                \
+    while (*p != '\0') {          \
+      if(*p == '\n') {            \
+        *p = '\0';                \
+        break;                    \
+      }                           \
+      p++;                        \
+    }                             \
+}
 
 /*
 NAME
@@ -22,92 +42,94 @@ DESCRIPTION
 */
 
 int isnumber(char *);
-int copy_substr(char *, char *, int, int);
+void err(char *msg, int status);
+
 main(int argc, char **argv)
 {
+  char line[MAXLINE], *c;
+  FILE *fp;
+  int length, width, page_no, line_no, overflow, i;
+  
+  length = DEF_LENGTH;
+  width = DEF_WIDTH;
 
-  char line[MAXLINE], line_overflow[MAXLINE], *c;
-
-  int line_no = 0;
-  int char_pos = 0;
-  int page_no = 0;
-
-  int length = DEF_LENGTH;
-  int width = DEF_WIDTH; 
-  int i = 0;
-    
   while (--argc > 0 && (*++argv)[0] == '-') {
     if (*(argv[0]+1) == 'l') {
       if (argv[1] != NULL && isnumber(argv[1])) {
         length = atoi(argv[1]);
         --argc;
         ++argv;
-      } else {
-        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>0] [-w num>0] [file ...]\n");
-        exit(1);
-      }
+      } else 
+        help(); 
     } else if (*(argv[0]+1) == 'w') {
       if (argv[1] != NULL && isnumber(argv[1])) {
         width = atoi(argv[1]);
         --argc;
         ++argv;
-      } else {
-        fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>0] [-w num>0] [file ...]\n");
-        exit(1);
-      }
-    }
+      } else 
+        help(); 
+    } else
+      help();
   }
 
-  if (length <= 1 || width <= 0) {
-    fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num>1] [-w num>0] [file ...]\n");
-    exit(1);
-  }
+  if (length <= 1 || width <= 0)
+    help();
 
   if (argc >= 1) {
     while (argc-- > 0) {
-      FILE *fp = fopen(*argv, "r");
-      if (fp == NULL) {
-        fprintf(stderr, "page: can't open %s\n", *argv);
-        exit(1);
-      }
-      line_no = page_no = 0;
-      line_overflow[0] = '\0';
-      while (fp != NULL && (c = line_overflow[0] != '\0' ? line_overflow : fgets(line, MAXLINE, fp)) != NULL) {
-        int cur_line_len = strlen(c);
-        if (line_no == 0 && page_no == 0) {
-          printf("%*s\n", (int)((width-strlen(*argv))/2), *argv);
-          line_no++;
-        } 
+      if ((fp = fopen(*argv, "r")) == NULL)
+        file_err(argv);
+
+      line_no = page_no = overflow = 0;
+      while (fp != NULL) {
+        if (line_no == 0 && page_no == 0)
+          c = *argv;
+        else 
+          c = overflow != 0 ? c : fgets(line, MAXLINE, fp);
+        
+        if (c == NULL)
+          break;
+
+        strip_newline_at_end(c);
+        int cur_line_len = strlen(c) - overflow; 
+
         if (line_no == length-1) {
           printf("%*d\n", width/2, page_no+1);
           line_no = 0;
           page_no++;
         }
         
-        if (cur_line_len < width){
-          printf("%s", c);
+        if (cur_line_len <= width) {
+          for ( ; *(c+overflow) != '\0'; c++)
+            putchar(*(c+overflow));
+          putchar('\n');
+          overflow = 0;
           line_no++;
-          line_overflow[0] = '\0';
         } else {
-          copy_substr(line_overflow, line, (width-1), -1);
-          line[width-1] = '\n';
-          line[width] = '\0';
-          printf("%s", c);
+          i = 0;
+          while (i < width && *(c+overflow+i) != '\0') {
+            putchar(*(c+overflow+i));
+            i++;
+          }
+          putchar('\n');
+          if (*(c+overflow+i) == '\0')
+            overflow = 0;
+          else
+            overflow += i;
           line_no++;
         }
       }
+
       if (line_no != 0) {
-        while (line_no != 0 && line_no++ < length-2)
+        while (line_no++ <= length-2)
           printf("\n");
         printf("%*d\n", width/2, page_no+1);
       }
       fclose(fp);
       argv++;
     }
-  } else {
-    fprintf(stderr, "page:\n\tUsage:\n\t\t./a.out [-l num] [-w num] [file ...]\n");
-    exit(1);
-  }
+  } else
+    help();
 }
 
 int isnumber(char *s) {
@@ -119,30 +141,4 @@ int isnumber(char *s) {
     }
  }
   return 1;
-}
-
-int copy_substr(char *s, char *p, int start, int end)
-{
-  if (end == -1) {
-    end = strlen(p);
-  }
-  if(start >= strlen(p)) {
-    fprintf(stderr, "copy_substr: invalid start index: %d for str with len len: %lu\n", start, strlen(p));
-    return 1;
-  }
-  if(end > strlen(p)) {
-    fprintf(stderr, "substr: invalid end index: %d for str with len: %lu\n", end, strlen(p));
-    return 1;
-  }
-  
-  if (start > end) {
-    fprintf(stderr, "copy_substr: invalid indexes, start index: %d cannot be bigger than end index: %d\n", start, end);
-    return 1;
-  }
-  
-  for ( ; start<=end; start++) {
-    *s++ = *(p+start);
-  }
-  *s = '\0';
-  return 0;
 }
