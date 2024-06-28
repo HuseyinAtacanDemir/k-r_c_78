@@ -1,0 +1,15 @@
+test
+file
+for
+testing
+custom
+stdlib
+implementations
+of
+fopen
+fclose
+fillbuf
+flushbuf
+and
+fflush
+
